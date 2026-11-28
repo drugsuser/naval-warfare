@@ -383,8 +383,8 @@ function startOcean() {
     lastY = event.clientY;
     if (event.pointerType === 'mouse' && !(event.buttons & 2)) return;
     const radiansPerPixel = 1.5 * uniforms.uTanHalfFov.value / Math.max(innerHeight, 1);
-    const direction = event.pointerType === 'mouse' ? -1 : 1;
-    turn(direction * deltaX * radiansPerPixel, direction * deltaY * radiansPerPixel);
+    const horizontalDirection = event.pointerType === 'mouse' ? -1 : 1;
+    turn(horizontalDirection * deltaX * radiansPerPixel, deltaY * radiansPerPixel);
   });
 
   for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) {
