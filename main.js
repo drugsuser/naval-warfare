@@ -126,6 +126,7 @@ function startOcean() {
   }
 
   function boardCruiser() {
+    const wasDefault = atDefaultView;
     aboard = true;
     atDefaultView = false;
     clearMovement();
@@ -135,7 +136,7 @@ function startOcean() {
     const bearing = p => Math.atan2(p.x - focus.x, p.z - focus.z);
     const radius = p => Math.hypot(p.x - focus.x, p.z - focus.z);
     boarding = {
-      focus, elapsed: 0, startY: camera.position.y, endY: end.y,
+      focus, wasDefault, leaving: false, elapsed: 0, startY: camera.position.y, endY: end.y,
       startRadius: radius(camera.position), endRadius: radius(end),
       startBearing: bearing(camera.position),
       sweep: angleDelta(bearing(camera.position), bearing(end)),
@@ -145,7 +146,7 @@ function startOcean() {
 
   function advanceBoarding(dt) {
     const b = boarding;
-    b.elapsed += dt;
+    b.elapsed = THREE.MathUtils.clamp(b.elapsed + (b.leaving ? -dt : dt), 0, 1.5);
     const t = Math.min(b.elapsed / 1.5, 1);
     const ease = t * t * (3 - 2 * t);
     const angle = b.startBearing + b.sweep * ease;
@@ -160,7 +161,12 @@ function startOcean() {
     view.yaw = facing - (1 - lock) * angleDelta(b.startYaw, -b.startBearing);
     const pitch = Math.atan2(b.focus.y - camera.position.y, radius);
     view.pitch = THREE.MathUtils.lerp(b.startPitch, pitch, lock);
-    if (t === 1) boarding = null;
+    if (b.leaving && t === 0) {
+      view.yaw = b.startYaw;
+      atDefaultView = b.wasDefault;
+      aboard = false;
+      boarding = null;
+    }
   }
 
   function clearMovement() {
@@ -307,7 +313,7 @@ function startOcean() {
       // All shader rates are integral, so the phase can wrap without a jump.
       uniforms.uPhase.value = (uniforms.uPhase.value + elapsed * Math.PI / 32) % (2 * Math.PI);
       uniforms.uTime.value += elapsed;
-      if (boarding) advanceBoarding(elapsed);
+      if (boarding && (boarding.leaving || boarding.elapsed < 1.5)) advanceBoarding(elapsed);
       else if (!aboard) moveCamera(elapsed);
     }
     previousTime = now;
@@ -398,7 +404,14 @@ function startOcean() {
   }, { passive: false });
 
   window.addEventListener('keydown', (event) => {
-    if (aboard || event.altKey || event.ctrlKey || event.metaKey || contextLost) return;
+    if (event.altKey || event.ctrlKey || event.metaKey || contextLost) return;
+    if (aboard) {
+      if (event.code === 'KeyQ') {
+        boarding.leaving = true;
+        event.preventDefault();
+      }
+      return;
+    }
     if (movementKeys.has(event.code)) {
       heldKeys.add(event.code);
       if (event.code === 'Space' || event.code.startsWith('Key')) event.preventDefault();
