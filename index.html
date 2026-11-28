@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Открытый океан</title>
+  <link rel="stylesheet" href="./scene.css">
+</head>
+<body>
+  <canvas id="ocean" tabindex="0"
+    aria-label="Открытый океан. WASD — движение, Shift — вниз, пробел — вверх, колёсико — быстро вперёд или назад. Чтобы осмотреться, двигайте мышью с зажатой левой или правой кнопкой, проведите пальцем по экрану или используйте стрелки. Home сбрасывает камеру."></canvas>
+  <canvas id="minimap" width="212" height="292" role="img"
+    aria-label="Неподвижная карта области 400 на 560 игровых единиц. Север сверху, юг снизу, запад слева, восток справа. Стрелка показывает положение камеры и направление взгляда."></canvas>
+  <p id="error" role="status" hidden></p>
+  <script src="./three.min.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
